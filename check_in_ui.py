@@ -5,14 +5,11 @@ import sqlite3
 import main
 from utils import DB_NAME, Utils
 
-# List of all rooms
-all_rooms = [101, 102, 103, 104, 105, 106, 107, 108, 109, 110]
-
 
 class CheckIN:
     def __init__(self, root):
         self.root = root
-        self._fetch_available_rooms()
+        self.available_rooms, self.occupied_rooms = Utils.get_available_rooms()
         self._setup_window()
         self._create_frames()
         self._create_widgets()
@@ -54,7 +51,6 @@ class CheckIN:
         self.daysEntry = Utils.create_input_field(self.checkinFrame, "ENTER NUMBER OF DAYS TO STAY :", self.days_var, row=3, is_int=True)
 
         # Room number selection
-        self._fetch_available_rooms()
         if self.available_rooms:
             self.room_number_var = StringVar()
             Utils.create_label(self.checkinFrame, "SELECT ROOM NUMBER: ", font=('arial', 20, 'bold'), fg="#15d3ba", anchor="w", row=4, column=2)
@@ -90,9 +86,6 @@ class CheckIN:
         with conn:
             cursor = conn.cursor()
             cursor.execute(
-                'CREATE TABLE IF NOT EXISTS Hotel (Fullname TEXT, Address TEXT, mobile_number NUMBER, number_days NUMBER, room_number NUMBER)'
-            )
-            cursor.execute(
                 'INSERT INTO Hotel (FullName, Address, mobile_number, number_days, room_number) VALUES (?, ?, ?, ?, ?)',
                 (name, address, mobile, days, room)
             )
@@ -112,7 +105,7 @@ class CheckIN:
         self.daysEntry.delete(0, END)
 
         # Reset the room selection in the Combobox
-        self._fetch_available_rooms()
+        self.available_rooms, self.occupied_rooms = Utils.get_available_rooms()
         if self.available_rooms:
             self.room_combobox['values'] = self.available_rooms
             self.room_combobox.current(0)  # Reset to the first available room
@@ -120,24 +113,6 @@ class CheckIN:
         else:
             self.room_number_var.set("")  # Clear the room number if no rooms are available
             messagebox.showerror("ERROR", "NO ROOMS AVAILABLE")
-
-    def _fetch_available_rooms(self):
-        """Fetch available rooms from the database."""
-        conn = sqlite3.connect(DB_NAME)
-        with conn:
-            cursor = conn.cursor()
-            # Ensure the table exists
-            cursor.execute(
-                'CREATE TABLE IF NOT EXISTS Hotel (Fullname TEXT, Address TEXT, mobile_number NUMBER, number_days NUMBER, room_number NUMBER)'
-            )
-            conn.commit()
-
-            # Fetch all rooms and occupied rooms
-            cursor.execute("SELECT room_number FROM Hotel")
-            occupied_rooms = [row[0] for row in cursor.fetchall()]
-
-            # Calculate available rooms
-            self.available_rooms = [room for room in all_rooms if room not in occupied_rooms]
 
 def check_in_ui_fun():
     root = Tk()

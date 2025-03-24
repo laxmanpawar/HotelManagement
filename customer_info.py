@@ -1,7 +1,7 @@
 import sqlite3
 from tkinter import *
 import main
-from utils import DB_NAME
+from utils import DB_NAME, Utils
 
 class CustomerInfo:
     def __init__(self, root):
@@ -35,73 +35,41 @@ class CustomerInfo:
     def _create_widgets(self):
         """Create and place all widgets."""
         # Display title
-        self._create_label(
-            self.top_frame, "LIST OF CUSTOMER", font=('arial', 50, 'bold'), fg="#15d3ba", row=0, column=3
+        Utils.create_label(
+            self.top_frame, "LIST OF GUESTS", font=('arial', 50, 'bold'), fg="#15d3ba", anchor="center", row=0, column=3
         )
 
         # Name section
-        self._create_label(
-            self.left_frame, "NAME", font=('arial', 20, 'bold'), fg="#15d3ba", row=0, column=1
+        Utils.create_label(
+            self.left_frame, "NAME", font=('arial', 20, 'bold'), fg="#15d3ba", anchor="center", row=0, column=1
         )
-        self.name_customer_entry = self._create_text_field(self.left_frame, height=30, width=70, row=1, column=1)
+        self.name_customer_entry = Utils.create_text_field(self.left_frame, height=30, width=70, row=1, column=1)
 
         # Room number section
-        self._create_label(
-            self.right_frame, "ROOM NO", font=('arial', 20, 'bold'), fg="#15d3ba", row=0, column=1
+        Utils.create_label(
+            self.right_frame, "ROOM NO", font=('arial', 20, 'bold'), fg="#15d3ba", anchor="center", row=0, column=1
         )
-        self.room_no_customer_entry = self._create_text_field(self.right_frame, height=30, width=70, row=1, column=1)
+        self.room_no_customer_entry = Utils.create_text_field(self.right_frame, height=30, width=70, row=1, column=1)
 
         # Buttons
-        self._create_button(
+        Utils.create_button(
             self.top_frame, "HOME", main.home_ui, row=8, column=3
         )
-        self._create_button(
+        Utils.create_button(
             self.top_frame, "DISPLAY", self._display_info, row=8, column=4
         )
-
-    def _create_label(self, parent, text, font, fg, row, column):
-        """Helper method to create a label."""
-        label = Label(parent, font=font, text=text, fg=fg, anchor="center")
-        label.grid(row=row, column=column, padx=10, pady=10)
-
-    def _create_text_field(self, parent, height, width, row, column):
-        """Helper method to create a text field."""
-        text_field = Text(parent, height=height, width=width)
-        text_field.grid(row=row, column=column, padx=10, pady=10)
-        return text_field
-
-    def _create_button(self, parent, text, command, row, column):
-        """Helper method to create a button."""
-        button = Button(
-            parent, text=text, font=('', 15), bg="#15d3ba", relief=RIDGE, height=2, width=15,
-            fg="black", anchor="center", command=command
-        )
-        button.grid(row=row, column=column, padx=10, pady=10)
-
+    
     def _display_info(self):
         """Fetch and display customer information."""
-        conn = sqlite3.connect(DB_NAME)
-        with conn:
-            cursor = conn.cursor()
-            cursor.execute(
-                'CREATE TABLE IF NOT EXISTS Hotel (Fullname TEXT, Address TEXT, mobile_number TEXT, number_days TEXT, room_number NUMBER)'
-            )
-            conn.commit()
+        # Fetch customer names and room numbers using Utils
+        guests = Utils.get_all_guests()
 
-            # Fetch and display customer names
-            cursor.execute("SELECT Fullname FROM Hotel")
-            names = cursor.fetchall()
-            self.name_customer_entry.delete(1.0, END)  # Clear previous data
-            for name in names:
-                self.name_customer_entry.insert(INSERT, name[0] + '\n')
-
-            # Fetch and display room numbers
-            cursor.execute("SELECT room_number FROM Hotel")
-            rooms = cursor.fetchall()
-            self.room_no_customer_entry.delete(1.0, END)  # Clear previous data
-            for room in rooms:
-                self.room_no_customer_entry.insert(INSERT, str(room[0]) + '\n')
-
+        # Display customer names
+        self.name_customer_entry.delete(1.0, END)
+        self.room_no_customer_entry.delete(1.0, END)
+        for guest in guests:
+            self.name_customer_entry.insert(INSERT, guest[0] + '\n')
+            self.room_no_customer_entry.insert(INSERT, str(guest[4]) + '\n')
 
 def customer_info_ui():
     root = Tk()

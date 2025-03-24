@@ -1,8 +1,12 @@
 from tkinter import *
 from tkinter import messagebox
 from tkinter.ttk import Combobox  # Import Combobox
+import sqlite3
 
 DB_NAME = 'Hotel.db'
+
+# List of all rooms in the hotel
+ALL_ROOMS_IN_HOTEL = [101, 102, 103, 104, 105, 106, 107, 108, 109, 110]
 
 
 class Utils:
@@ -53,3 +57,35 @@ class Utils:
             return True
         messagebox.showerror("ERROR", "NUMBER OF DAYS MUST BE A POSITIVE INTEGER")
         return False
+    
+    @staticmethod
+    def get_available_rooms():
+        """Update available rooms list."""
+        """Fetch available rooms from the database."""
+        
+        available_rooms = []
+
+        conn = sqlite3.connect(DB_NAME)
+        with conn:
+            cursor = conn.cursor()
+
+            # Fetch all rooms and occupied rooms
+            cursor.execute("SELECT room_number FROM Hotel")
+            occupied_rooms = [row[0] for row in cursor.fetchall()]
+
+            # Calculate available rooms
+            available_rooms = [room for room in ALL_ROOMS_IN_HOTEL if room not in occupied_rooms]
+
+        return available_rooms, occupied_rooms
+    
+    @staticmethod
+    def get_all_guests():
+        """Fetch all guests from the database."""
+        conn = sqlite3.connect(DB_NAME)
+        with conn:
+            cursor = conn.cursor()
+
+            cursor.execute("SELECT * FROM Hotel")
+            result = cursor.fetchall()
+
+        return result

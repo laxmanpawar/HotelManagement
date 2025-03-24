@@ -1,8 +1,10 @@
+import sqlite3
 from tkinter import *
 import check_in_ui
 import check_out
 import RoomwiseInfo
 import customer_info
+from utils import DB_NAME
 
 class Hotel:
     def __init__(self, root):
@@ -10,6 +12,18 @@ class Hotel:
         self._setup_window()
         self._create_frames()
         self._create_widgets()
+
+    def _setup_database(self):
+        """Create a database connection."""
+        
+        conn = sqlite3.connect(DB_NAME)
+        with conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                'CREATE TABLE IF NOT EXISTS Hotel (Fullname TEXT, Address TEXT, mobile_number NUMBER, number_days NUMBER, room_number NUMBER)'
+            )
+            cursor.commit()
+
 
     def _setup_window(self):
         """Set up the main window properties."""

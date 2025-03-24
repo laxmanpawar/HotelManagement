@@ -1,8 +1,11 @@
 import sqlite3
 from tkinter import *
 from tkinter.ttk import Combobox
+from tkinter import messagebox
 import main
 from utils import DB_NAME, Utils
+
+PRICE_PER_DAY = 1000  # Fixed price per day
 
 class CheckOut:
     def __init__(self, root):
@@ -48,7 +51,7 @@ class CheckOut:
         self.room_no_combobox = Combobox(self.bottom_frame, textvariable=self.room_var, values=occupied_rooms, state="readonly", width=10)
         self.room_no_combobox.grid(row=2, column=3, padx=10, pady=10)
         if len(occupied_rooms) > 0:
-            self.room_no_combobox.current(0)  # Set the first available room as default 
+            self.room_no_combobox.current(0)  # Set the first available room as default
             self.room_no_combobox.set(occupied_rooms[0])  # Set default value in StringVar
         else:
             self.room_no_combobox.set('N/A')
@@ -68,7 +71,7 @@ class CheckOut:
 
     def _check_out(self):
         """Handle the check-out process."""
-        room_number = self.room_var.get()
+        room_number = self.room_no_combobox.get()
         if not room_number:
             self.get_info_entry.insert(INSERT, "PLEASE SELECT A VALID ROOM NUMBER\n")
             return
@@ -81,14 +84,26 @@ class CheckOut:
             rooms = [row[0] for row in cursor.fetchall()]
 
             if int(room_number) in rooms:
-                cursor.execute("SELECT Fullname, room_number FROM Hotel WHERE room_number = ?", (room_number,))
+                cursor.execute("SELECT Fullname, number_days, room_number FROM Hotel WHERE room_number = ?", (room_number,))
                 result = cursor.fetchone()
                 if result:
+                    fullname, number_days, room_number = result
+                    total_bill = number_days * PRICE_PER_DAY
+
+                    # Display check-out information and bill
+                    self.get_info_entry.delete(1.0, END)
                     self.get_info_entry.insert(
-                        INSERT, f"\n{result[0]} has checked out from room {result[1]}\n"
+                        INSERT,
+                        f"NAME: {fullname}\nROOM NUMBER: {room_number}\n"
+                        f"NUMBER OF DAYS: {number_days}\nTOTAL BILL: ₹{total_bill}\n"
+                        f"CHECK OUT SUCCESSFUL!\n"
                     )
+
+                    # Remove the guest from the database
                     cursor.execute("DELETE FROM Hotel WHERE room_number = ?", (room_number,))
                     conn.commit()
+                else:
+                    self.get_info_entry.insert(INSERT, "PLEASE SELECT A VALID ROOM NUMBER\n")
             else:
                 self.get_info_entry.insert(INSERT, "PLEASE SELECT A VALID ROOM NUMBER\n")
 

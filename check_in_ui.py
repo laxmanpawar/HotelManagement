@@ -69,7 +69,8 @@ class CheckIN:
 
     def _submit_info(self):
         """Handle the submission of check-in information."""
-        if not self.room_number_var:
+        room_number = self.room_combobox.get()
+        if not room_number:
             messagebox.showerror("ERROR", "NO ROOMS AVAILABLE")
             return
 
@@ -77,7 +78,6 @@ class CheckIN:
         address = self.addressEntry.get()
         mobile = self.mobileEntry.get()
         days = self.daysEntry.get()
-        room = self.room_number_var.get()
 
         if not Utils.validate_mobile(mobile) or not Utils.validate_days(days):
             return
@@ -87,7 +87,7 @@ class CheckIN:
             cursor = conn.cursor()
             cursor.execute(
                 'INSERT INTO Hotel (FullName, Address, mobile_number, number_days, room_number) VALUES (?, ?, ?, ?, ?)',
-                (name, address, mobile, days, room)
+                (name, address, mobile, days, room_number)
             )
             conn.commit()
         self._reset_fields()

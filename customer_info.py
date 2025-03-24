@@ -70,6 +70,9 @@ class CustomerInfo:
         for guest in guests:
             self.name_customer_entry.insert(INSERT, guest[0] + '\n')
             self.room_no_customer_entry.insert(INSERT, str(guest[4]) + '\n')
+        if not guests:
+            self.name_customer_entry.insert(INSERT, "NO GUESTS FOUND\n")
+            self.room_no_customer_entry.insert(INSERT, "NO GUESTS FOUND\n")
 
 def customer_info_ui():
     root = Tk()

@@ -49,15 +49,15 @@ class RoomwiseInfo:
         self.room_number_var = StringVar()
         self.room_no_combobox = Combobox(self.bottom_frame, textvariable=self.room_number_var, values=occupied_rooms, state="readonly", width=10)
         self.room_no_combobox.grid(row=2, column=3, padx=10, pady=10)
+        self.info_text = Utils.create_text_field(self.info_frame, height=15, width=90, row=1, column=1)
         if len(occupied_rooms) > 0:
             self.room_no_combobox.current(0)  # Set the first available room as default 
             self.room_no_combobox.set(occupied_rooms[0])  # Set default value in StringVar
         else:
             self.room_no_combobox.set('N/A')
             self.room_no_combobox.set('')  # Set default value in StringVar
-
-        # Information display
-        self.info_text = Utils.create_text_field(self.info_frame, height=15, width=90, row=1, column=1)
+            self.info_text.delete(1.0, END)  # Clear previous data
+            self.info_text.insert(INSERT, f"NO ROOMS ARE OCCUPIED\n")
 
         # Buttons
         Utils.create_button(self.button_frame, "SUBMIT", self._fetch_room_info, row=8, column=2)

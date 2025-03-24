@@ -9,21 +9,32 @@ from utils import DB_NAME
 class Hotel:
     def __init__(self, root):
         self.root = root
+        self._setup_database()
         self._setup_window()
         self._create_frames()
         self._create_widgets()
 
     def _setup_database(self):
-        """Create a database connection."""
-        
-        conn = sqlite3.connect(DB_NAME)
-        with conn:
-            cursor = conn.cursor()
-            cursor.execute(
-                'CREATE TABLE IF NOT EXISTS Hotel (Fullname TEXT, Address TEXT, mobile_number NUMBER, number_days NUMBER, room_number NUMBER)'
-            )
-            cursor.commit()
-
+        """Create a database connection and ensure the required table exists."""
+        try:
+            conn = sqlite3.connect(DB_NAME)  # Connect to the database (creates it if it doesn't exist)
+            with conn:
+                cursor = conn.cursor()
+                # Create the Hotel table if it doesn't already exist
+                cursor.execute(
+                    '''
+                    CREATE TABLE IF NOT EXISTS Hotel (
+                        Fullname TEXT,
+                        Address TEXT,
+                        mobile_number NUMBER,
+                        number_days NUMBER,
+                        room_number NUMBER
+                    )
+                    '''
+                )
+                conn.commit()
+        except sqlite3.Error as e:
+            print(f"Error while setting up the database: {e}")
 
     def _setup_window(self):
         """Set up the main window properties."""
